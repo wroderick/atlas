@@ -596,7 +596,7 @@ class UNetATLASModelCascaded(ATLASModel):
         
         Inputs:
         - FLAGS: A _FlagValuesWrapper object passed in from main.py.
-        """
+    """
     super().__init__(FLAGS)
         
     def build_graph(self):
