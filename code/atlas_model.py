@@ -567,8 +567,7 @@ class ZeroATLASModel(ATLASModel):
 class UNetATLASModel(ATLASModel):
   def __init__(self, FLAGS):
     """
-    Initializes the U-Net ATLAS model, which predicts 0 for the entire mask
-    no matter what, which performs well when --use_fake_target_masks.
+    Initializes the U-Net ATLAS model.
 
     Inputs:
     - FLAGS: A _FlagValuesWrapper object passed in from main.py.
@@ -593,8 +592,7 @@ class UNetATLASModel(ATLASModel):
 class UNetATLASModelCascaded(ATLASModel):
     def __init__(self, FLAGS):
     """
-        Initializes the U-Net ATLAS model, which predicts 0 for the entire mask
-        no matter what, which performs well when --use_fake_target_masks.
+        Initializes the cascaded U-Net ATLAS model.
         
         Inputs:
         - FLAGS: A _FlagValuesWrapper object passed in from main.py.
