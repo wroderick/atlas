@@ -601,13 +601,27 @@ class UNetATLASModelCascaded(ATLASModel):
         
     def build_graph(self):
         assert(self.input_dims == self.inputs_op.get_shape().as_list()[1:])
-        unet = UNet(input_shape=self.input_dims,
+        unet1 = UNet(input_shape=self.input_dims,
                         keep_prob=self.keep_prob,
                         output_shape=self.input_dims,
-                        scope_name="unet")
-        self.logits_op = tf.squeeze(
-            unet.build_graph(tf.expand_dims(self.inputs_op, 3)), axis=3)
+                        scope_name="unet1")
+        self.logits_op_1 = tf.squeeze(
+            unet1.build_graph(tf.expand_dims(self.inputs_op_1, 3)), axis=3)
                             
+        self.predicted_mask_probs_op_1 = tf.sigmoid(self.logits_op_1,
+            name="predicted_mask_probs1")
+        self.predicted_masks_op_1 = tf.cast(self.predicted_mask_probs_op_1 > 0.5,
+            tf.uint8,
+            name="predicted_masks1")
+
+
+        unet2 = UNet(input_shape=self.input_dims,
+                    keep_prob=self.keep_prob,
+                    output_shape=self.input_dims,
+                    scope_name="unet2")
+        self.logits_op_2 = tf.squeeze(
+            unet2.build_graph(tf.expand_dims(self.logits_op_2, 3)), axis=3)
+        
         self.predicted_mask_probs_op = tf.sigmoid(self.logits_op,
             name="predicted_mask_probs")
         self.predicted_masks_op = tf.cast(self.predicted_mask_probs_op > 0.5,
