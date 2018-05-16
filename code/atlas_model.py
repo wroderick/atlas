@@ -583,7 +583,7 @@ class UNetATLASModel(ATLASModel):
                 output_shape=self.input_dims,
                 scope_name="unet")
     self.logits_op = tf.squeeze(
-      unet.build_graph(tf.expand_dims(self.inputs_op, 3)), axis=3)
+      unet.build_smallgraph(tf.expand_dims(self.inputs_op, 3)), axis=3)
 
     self.predicted_mask_probs_op = tf.sigmoid(self.logits_op,
                                               name="predicted_mask_probs")
