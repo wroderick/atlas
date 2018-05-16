@@ -174,6 +174,7 @@ class UNet(NeuralNetwork):
 
       conv11 = self.conv2d(drop10, filter_shape=[1, 1, 64, 1], scope_name="conv11")  # (b, 232, 196, 1)
       out = tf.identity(conv11, name="out")
+    return out
       
   def build_smallgraph(self, input):
     with tf.variable_scope(self.scope_name):
