@@ -33,7 +33,7 @@ tf.app.flags.DEFINE_integer("keep", None,
                             "all. These files are storage-consuming so should "
                             "not be kept in aggregate.")
 tf.app.flags.DEFINE_string("mode", "train",
-                           "Options: {train,eval}.")
+                           "Options: {train,eval,save_output_masks}.")
 tf.app.flags.DEFINE_integer("print_every", 1,
                             "How many iterations to do per print.")
 tf.app.flags.DEFINE_integer("save_every", 500,
@@ -191,6 +191,24 @@ def main(_):
       # Trains the model
       atlas_model.train(sess, *setup_train_dev_split(FLAGS))
   elif FLAGS.mode == "eval":
+    with tf.Session(config=config) as sess:
+      # Sets logging configuration
+      logging.basicConfig(level=logging.INFO)
+
+      # Loads the most recent model
+      initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=True)
+
+      # Shows examples from the dev set
+      _, _, dev_input_paths, dev_target_mask_paths =\
+        setup_train_dev_split(FLAGS)
+      dev_dice = atlas_model.calculate_dice_coefficient(sess,
+                                                        dev_input_paths,
+                                                        dev_target_mask_paths,
+                                                        "dev",
+                                                        num_samples=1000,
+                                                        plot=True)
+      logging.info(f"dev dice_coefficient: {dev_dice}")
+  elif FLAGS.mode == "save_output_masks":
     with tf.Session(config=config) as sess:
       # Sets logging configuration
       logging.basicConfig(level=logging.INFO)
