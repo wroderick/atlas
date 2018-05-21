@@ -277,6 +277,27 @@ class ATLASModel(object):
     output_feed = { "predicted_masks": self.predicted_masks_op }
     results = sess.run(output_feed, input_feed)
     return results["predicted_masks"]
+  
+  def get_predicted_masks_for_training_example(self, sess, input_example):
+    """
+    Runs a forward-pass only; gets the predicted masks.
+
+    Inputs:
+    - sess: A TensorFlow Session object.
+    - input_example: An image.
+
+    Outputs:
+    - predicted_masks: A numpy array of the shape self.FLAGS.batch_size by
+      self.output_dims.
+    """
+    input_feed = {}
+    input_feed[self.batch_size_op] = self.FLAGS.batch_size
+    input_feed[self.inputs_op] = input_example
+    # keep_prob not input, so it will default to 1 i.e. no dropout
+
+    output_feed = { "predicted_masks": self.predicted_masks_op }
+    results = sess.run(output_feed, input_feed)
+    return results["predicted_masks"]
 
 
   def calculate_loss(self,

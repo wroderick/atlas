@@ -1,10 +1,13 @@
 import json
 import logging
 import os
+import glob
+from skimage import io
 import sys
 import tensorflow as tf
 
 from split import setup_train_dev_split
+from data_batcher import SliceBatchGenerator
 
 # Relative path of the main directory
 MAIN_DIR = os.path.relpath(
@@ -217,49 +220,62 @@ def main(_):
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=True)
 
       # Creates a new dataset of saved output masks
-      # For each image in the dataset
       
-      #def calculate_loss(self,
-      #                   sess,
-      #                   input_paths,
-      #                   target_mask_paths,
-      #                   dataset,
-      #                   num_samples=None):
-      """
-        Calculates the loss for a dataset, represented by a list of {input_paths}
-        and {target_mask_paths}.
-        
-        Inputs:
-        - sess: A TensorFlow Session object.
-        - input_paths: A list of Python strs that represent pathnames to input
-        image files.
-        - target_mask_paths: A list of Python strs that represent pathnames to
-        target mask files.
-        - dataset: A Python str that represents the dataset being tested. Options:
-        {train,dev}. Just for logging purposes.
-        - num_samples: A Python int that represents the number of samples to test.
-        If num_samples=None, then test whole dataset.
-        
-        Outputs:
-        - loss: A Python float that represents the average loss across the sampled
-        examples.
-      """
+#
+#      """
+#        Calculates the loss for a dataset, represented by a list of {input_paths}
+#        and {target_mask_paths}.
+#
+#        Inputs:
+#        - sess: A TensorFlow Session object.
+#        - input_paths: A list of Python strs that represent pathnames to input
+#        image files.
+#        - target_mask_paths: A list of Python strs that represent pathnames to
+#        target mask files.
+#        - dataset: A Python str that represents the dataset being tested. Options:
+#        {train,dev}. Just for logging purposes.
+#        - num_samples: A Python int that represents the number of samples to test.
+#        If num_samples=None, then test whole dataset.
+#
+#        Outputs:
+#        - loss: A Python float that represents the average loss across the sampled
+#        examples.
+#      """
+#
 
-      sbg = SliceBatchGenerator(input_paths,
-                                           target_mask_paths,
-                                           self.FLAGS.batch_size,
-                                           num_samples=num_samples,
-                                           shape=(self.FLAGS.slice_height,
-                                                  self.FLAGS.slice_width),
-                                           use_fake_target_masks=self.FLAGS.use_fake_target_masks)
-      # Iterates over batches
-      for batch in sbg.get_batch():
-        predicted_masks = self.get_predicted_masks_for_batch(sess, batch)
-      
+#      for batch in sbg.get_batch():
+#          predicted_masks = self.get_predicted_masks_for_batch(sess, batch)
+
+
+      # For each image in the dataset
       # Perform a forward pass and store the resulting mask
       # Use a boolean mask to form the final output
       # Save the final output
-      print('Made it here')
+
+      prefix = os.path.join(FLAGS.data_dir, "ATLAS_R1.1")
+      if FLAGS.input_regex == None:
+        input_paths_regex = "Site*/**/*_t1w_deface_stx/*.jpg"
+      else:
+        input_paths_regex = FLAGS.input_regex
+    
+      slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
+                            recursive=True)
+      for curr_file_path in slice_paths:
+        curr_img = io.imread(curr_file_path)
+        #imgs_to_process_at_a_time = 1
+        
+        #sbg = SliceBatchGenerator(curr_file_path,
+        #                              curr_file_path,
+        #                              imgs_to_process_at_a_time,
+        #                              shape=(FLAGS.slice_height,
+        #                                     FLAGS.slice_width),
+        #                              use_fake_target_masks=FLAGS.use_fake_target_masks)
+        #curr_batch = sbg.get_batch()
+        predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_img)
+        print(curr_file_path)
+
+
+
 
 
 
