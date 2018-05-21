@@ -208,7 +208,7 @@ def main(_):
                                                         num_samples=1000,
                                                         plot=True)
       logging.info(f"dev dice_coefficient: {dev_dice}")
-  elif FLAGS.mode == "save_output_masks":
+  elif FLAGS.mode == "save_output_masks":    #run with this line: python main.py --experiment_name=0002 --mode=save_output_masks --num_epochs=3 --eval_every=100 --print_every=1 --save_every=100 --summary_every=20 --model_name=ATLASModel
     with tf.Session(config=config) as sess:
       # Sets logging configuration
       logging.basicConfig(level=logging.INFO)
@@ -216,16 +216,52 @@ def main(_):
       # Loads the most recent model
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=True)
 
-      # Shows examples from the dev set
-      _, _, dev_input_paths, dev_target_mask_paths =\
-        setup_train_dev_split(FLAGS)
-      dev_dice = atlas_model.calculate_dice_coefficient(sess,
-                                                        dev_input_paths,
-                                                        dev_target_mask_paths,
-                                                        "dev",
-                                                        num_samples=1000,
-                                                        plot=True)
-      logging.info(f"dev dice_coefficient: {dev_dice}")
+      # Creates a new dataset of saved output masks
+      # For each image in the dataset
+      
+      #def calculate_loss(self,
+      #                   sess,
+      #                   input_paths,
+      #                   target_mask_paths,
+      #                   dataset,
+      #                   num_samples=None):
+      """
+        Calculates the loss for a dataset, represented by a list of {input_paths}
+        and {target_mask_paths}.
+        
+        Inputs:
+        - sess: A TensorFlow Session object.
+        - input_paths: A list of Python strs that represent pathnames to input
+        image files.
+        - target_mask_paths: A list of Python strs that represent pathnames to
+        target mask files.
+        - dataset: A Python str that represents the dataset being tested. Options:
+        {train,dev}. Just for logging purposes.
+        - num_samples: A Python int that represents the number of samples to test.
+        If num_samples=None, then test whole dataset.
+        
+        Outputs:
+        - loss: A Python float that represents the average loss across the sampled
+        examples.
+      """
+
+      sbg = SliceBatchGenerator(input_paths,
+                                           target_mask_paths,
+                                           self.FLAGS.batch_size,
+                                           num_samples=num_samples,
+                                           shape=(self.FLAGS.slice_height,
+                                                  self.FLAGS.slice_width),
+                                           use_fake_target_masks=self.FLAGS.use_fake_target_masks)
+      # Iterates over batches
+      for batch in sbg.get_batch():
+        predicted_masks = self.get_predicted_masks_for_batch(sess, batch)
+      
+      # Perform a forward pass and store the resulting mask
+      # Use a boolean mask to form the final output
+      # Save the final output
+      print('Made it here')
+
+
 
 
 if __name__ == "__main__":
