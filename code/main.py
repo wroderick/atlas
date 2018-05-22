@@ -5,6 +5,8 @@ import glob
 from skimage import io
 import sys
 import tensorflow as tf
+from PIL import Image
+import numpy as np
 
 from split import setup_train_dev_split
 from data_batcher import SliceBatchGenerator
@@ -271,7 +273,15 @@ def main(_):
         #                                     FLAGS.slice_width),
         #                              use_fake_target_masks=FLAGS.use_fake_target_masks)
         #curr_batch = sbg.get_batch()
-        predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_img)
+        # opens input, resizes it, converts to a numpy array
+        curr_input = Image.open(curr_file_path).convert("L")
+        # input = input.resize(self._shape[::-1], Image.NEAREST)
+        curr_shape=(FLAGS.slice_height,
+                    FLAGS.slice_width)
+        curr_input = curr_input.crop((0, 0) + curr_shape[::-1])
+        curr_input = np.asarray(curr_input) / 255.0
+        print(curr_input.shape)
+        predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_input)
         print(curr_file_path)
 
 
