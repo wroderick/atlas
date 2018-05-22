@@ -7,6 +7,8 @@ import sys
 import tensorflow as tf
 from PIL import Image
 import numpy as np
+import time
+from matplotlib import pyplot as plt
 
 from split import setup_train_dev_split
 from data_batcher import SliceBatchGenerator
@@ -262,7 +264,9 @@ def main(_):
     
       slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
                             recursive=True)
+      iter = 0
       for curr_file_path in slice_paths:
+        iter +=1
         curr_img = io.imread(curr_file_path)
         #imgs_to_process_at_a_time = 1
         
@@ -280,8 +284,32 @@ def main(_):
                     FLAGS.slice_width)
         curr_input = curr_input.crop((0, 0) + curr_shape[::-1])
         curr_input = np.asarray(curr_input) / 255.0
-        print(curr_input.shape)
+        curr_input = np.expand_dims(curr_input,0)
+        #print(curr_input.shape)
         predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_input)
+        output_masked_image = curr_input * predicted_mask
+        output_masked_image = np.squeeze(output_masked_image)
+        output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
+        print(output_masked_image.shape)
+        #print(output_masked_image.shape)
+        #io.imshow(output_masked_image)
+        #plt.show()
+        time.sleep(0.2)
+        outpath = "../data_output_masks/"
+        #im = Image.fromarray(output_masked_image)
+        #im.convert("RGB")
+        #im.
+        #print(im.size)
+        #im.show()
+        #print(outpath + str(iter) + '.jpg')
+        #im.save(outpath + str(iter) + ".tiff")
+        io.imsave(outpath + str(iter) + '.jpg',output_masked_image)
+        #im.save(outpath + str(iter) + ".jpg", "JPEG", quality=100)
+        #im.ensure_valid_options("PNG", fix_issues=True)
+        #im.save("../data_output_masks/test.png", "PNG", optimize=True)
+        #im.save("../data_output_masks/test.jpg")
+
+
         print(curr_file_path)
 
 
