@@ -100,6 +100,10 @@ tf.app.flags.DEFINE_float("dropout", 0.15,
 tf.app.flags.DEFINE_float("learning_rate", 0.001, "Sets the learning rate.")
 tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
                           "Clips the gradients to this norm.")
+tf.app.flags.DEFINE_float("pos_weight", 50.0,
+                          "Allows tradeoff between recall and precision by"
+                          "up or down weighting the cost of positive error"
+                          "relative to a negative error.")
 tf.app.flags.DEFINE_integer("num_epochs", None,
                             "Sets the number of epochs to train. None means "
                             "train indefinitely.")
@@ -200,7 +204,6 @@ def main(_):
     with tf.Session(config=config) as sess:
       # Loads the most recent model
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=False)
-
       # Trains the model
       atlas_model.train(sess, *setup_train_dev_split(FLAGS))
   elif FLAGS.mode == "eval":
