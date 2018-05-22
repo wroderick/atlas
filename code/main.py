@@ -20,6 +20,9 @@ MAIN_DIR = os.path.relpath(
 # Relative path of the data directory
 DEFAULT_DATA_DIR = os.path.join(MAIN_DIR, "data")
 
+#Relative path of the output masked data directory
+DEFAULT_OUTPUT_DATA_DIR = os.path.join(MAIN_DIR, "data_output_masks")
+
 # Relative path of the experiments directory
 EXPERIMENTS_DIR = os.path.join(MAIN_DIR, "experiments")
 
@@ -57,6 +60,9 @@ tf.app.flags.DEFINE_integer("num_summary_images", 64,
 tf.app.flags.DEFINE_string("data_dir", DEFAULT_DATA_DIR,
                            "Sets the dir in which to find data for training. "
                            "Defaults to data/.")
+tf.app.flags.DEFINE_string("output_data_dir", DEFAULT_OUTPUT_DATA_DIR,
+                           "Sets the dir in which to find output masked data for training. "
+                           "Defaults to data_output_masks/.")
 tf.app.flags.DEFINE_string("input_regex", None,
                            "Sets the regex to use for input paths. If set, "
                            "{FLAGS.p} will be ignored and train and dev sets "
@@ -216,6 +222,8 @@ def main(_):
                                                         plot=True)
       logging.info(f"dev dice_coefficient: {dev_dice}")
   elif FLAGS.mode == "save_output_masks":    #run with this line: python main.py --experiment_name=0002 --mode=save_output_masks --num_epochs=3 --eval_every=100 --print_every=1 --save_every=100 --summary_every=20 --model_name=ATLASModel
+
+   
     with tf.Session(config=config) as sess:
       # Sets logging configuration
       logging.basicConfig(level=logging.INFO)
@@ -231,6 +239,7 @@ def main(_):
       # Save the final output
 
       prefix = os.path.join(FLAGS.data_dir, "ATLAS_R1.1")
+      new_prefix = os.path.join(FLAGS.output_data_dir, "ATLAS_R1.1")
       if FLAGS.input_regex == None:
         input_paths_regex = "Site*/**/*_t1w_deface_stx/*.jpg"
       else:
@@ -238,9 +247,8 @@ def main(_):
     
       slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
                             recursive=True)
-      iter = 0
+      #iter = 0
       for curr_file_path in slice_paths:
-        iter +=1
         curr_img = io.imread(curr_file_path)
         # opens input, resizes it, converts to a numpy array
         curr_input = Image.open(curr_file_path).convert("L")
@@ -253,8 +261,19 @@ def main(_):
         output_masked_image = curr_input * predicted_mask
         output_masked_image = np.squeeze(output_masked_image)
         output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
-        outpath = "../data_output_masks/"
-        io.imsave(outpath + str(iter) + '.jpg',output_masked_image,quality=100)
+        #create new filepath to output masked images
+        old_folderpath = os.path.split(curr_file_path)[0]
+        filename = os.path.split(curr_file_path)[1]
+        new_slice_path = old_folderpath.replace(FLAGS.data_dir,FLAGS.output_data_dir)
+        #if folder doesn't exist, make it in specified folder
+        if not os.path.exists(new_slice_path):
+            os.makedirs(new_slice_path)
+        #save the image
+        io.imsave(new_slice_path + '/' + filename, output_masked_image, quality=100)
+        print("Finished saving file: " + new_slice_path + '/' + filename)
+        #iter += 1
+        #outpath = "../data_output_masks/"
+        #io.imsave(outpath + str(iter) + '.jpg',output_masked_image,quality=100)
 
 
 if __name__ == "__main__":
