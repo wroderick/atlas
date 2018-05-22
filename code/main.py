@@ -224,32 +224,6 @@ def main(_):
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=True)
 
       # Creates a new dataset of saved output masks
-      
-#
-#      """
-#        Calculates the loss for a dataset, represented by a list of {input_paths}
-#        and {target_mask_paths}.
-#
-#        Inputs:
-#        - sess: A TensorFlow Session object.
-#        - input_paths: A list of Python strs that represent pathnames to input
-#        image files.
-#        - target_mask_paths: A list of Python strs that represent pathnames to
-#        target mask files.
-#        - dataset: A Python str that represents the dataset being tested. Options:
-#        {train,dev}. Just for logging purposes.
-#        - num_samples: A Python int that represents the number of samples to test.
-#        If num_samples=None, then test whole dataset.
-#
-#        Outputs:
-#        - loss: A Python float that represents the average loss across the sampled
-#        examples.
-#      """
-#
-
-#      for batch in sbg.get_batch():
-#          predicted_masks = self.get_predicted_masks_for_batch(sess, batch)
-
 
       # For each image in the dataset
       # Perform a forward pass and store the resulting mask
@@ -268,54 +242,19 @@ def main(_):
       for curr_file_path in slice_paths:
         iter +=1
         curr_img = io.imread(curr_file_path)
-        #imgs_to_process_at_a_time = 1
-        
-        #sbg = SliceBatchGenerator(curr_file_path,
-        #                              curr_file_path,
-        #                              imgs_to_process_at_a_time,
-        #                              shape=(FLAGS.slice_height,
-        #                                     FLAGS.slice_width),
-        #                              use_fake_target_masks=FLAGS.use_fake_target_masks)
-        #curr_batch = sbg.get_batch()
         # opens input, resizes it, converts to a numpy array
         curr_input = Image.open(curr_file_path).convert("L")
-        # input = input.resize(self._shape[::-1], Image.NEAREST)
         curr_shape=(FLAGS.slice_height,
                     FLAGS.slice_width)
         curr_input = curr_input.crop((0, 0) + curr_shape[::-1])
         curr_input = np.asarray(curr_input) / 255.0
         curr_input = np.expand_dims(curr_input,0)
-        #print(curr_input.shape)
         predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_input)
         output_masked_image = curr_input * predicted_mask
         output_masked_image = np.squeeze(output_masked_image)
         output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
-        print(output_masked_image.shape)
-        #print(output_masked_image.shape)
-        #io.imshow(output_masked_image)
-        #plt.show()
-        time.sleep(0.2)
         outpath = "../data_output_masks/"
-        #im = Image.fromarray(output_masked_image)
-        #im.convert("RGB")
-        #im.
-        #print(im.size)
-        #im.show()
-        #print(outpath + str(iter) + '.jpg')
-        #im.save(outpath + str(iter) + ".tiff")
-        io.imsave(outpath + str(iter) + '.jpg',output_masked_image)
-        #im.save(outpath + str(iter) + ".jpg", "JPEG", quality=100)
-        #im.ensure_valid_options("PNG", fix_issues=True)
-        #im.save("../data_output_masks/test.png", "PNG", optimize=True)
-        #im.save("../data_output_masks/test.jpg")
-
-
-        print(curr_file_path)
-
-
-
-
-
+        io.imsave(outpath + str(iter) + '.jpg',output_masked_image,quality=100)
 
 
 if __name__ == "__main__":
