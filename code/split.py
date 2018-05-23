@@ -64,6 +64,8 @@ def _add_paths_to_lists(input_paths_list,
                                 f"{patient_id}_LesionSmooth_*/"
                                 f"image-slice{slice_id}.jpg")
       # Comment this out
+      #target_mask_paths_for_slice = glob.glob(os.path.join('', target_mask_path_regex),
+      #                                        recursive=True)
       target_mask_paths_for_slice = glob.glob(os.path.join(prefix, target_mask_path_regex),
                                               recursive=True)
       if merge_target_masks:
@@ -279,11 +281,23 @@ def setup_train_dev_split(FLAGS):
   else:
     raise ValueError(f"Specified unknown FLAGS.split_type={FLAGS.split_type}.")
 
-  _add_paths_to_lists(train_input_paths,
+  if FLAGS.use_masked_train_set:
+    new_prefix = os.path.join(FLAGS.original_data_dir, "ATLAS_R1.1")
+    _add_paths_to_lists(train_input_paths,
+                      train_target_mask_paths,
+                      new_prefix,
+                      FLAGS.merge_target_masks)
+    _add_paths_to_lists(dev_input_paths,
+                      dev_target_mask_paths,
+                      new_prefix,
+                      FLAGS.merge_target_masks)
+
+  else:
+    _add_paths_to_lists(train_input_paths,
                       train_target_mask_paths,
                       prefix,
                       FLAGS.merge_target_masks)
-  _add_paths_to_lists(dev_input_paths,
+    _add_paths_to_lists(dev_input_paths,
                       dev_target_mask_paths,
                       prefix,
                       FLAGS.merge_target_masks)
