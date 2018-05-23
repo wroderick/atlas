@@ -456,11 +456,7 @@ class ATLASModel(object):
     - sess: A TensorFlow Session object.
     - {train,dev}_{input_paths,target_mask_paths}: A list of Python strs
       that represent pathnames to input image files and target mask files.
-    """
-    #
-    if self.FLAGS.use_masked_train_set == True:
-        train_input_paths = self.FLAGS.masked_train_data_dir
-    
+    """    
     
     params = tf.trainable_variables()
     num_params = sum(map(lambda t: np.prod(tf.shape(t.value()).eval()), params))

@@ -63,6 +63,7 @@ def _add_paths_to_lists(input_paths_list,
       target_mask_path_regex = (f"Site{site_id}/{patient_id}/{scan_id}/"
                                 f"{patient_id}_LesionSmooth_*/"
                                 f"image-slice{slice_id}.jpg")
+      # Comment this out
       target_mask_paths_for_slice = glob.glob(os.path.join(prefix, target_mask_path_regex),
                                               recursive=True)
       if merge_target_masks:
