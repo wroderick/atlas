@@ -74,6 +74,11 @@ tf.app.flags.DEFINE_boolean("use_fake_target_masks", False,
                             "Sets whether to use fake target masks or not.")
 tf.app.flags.DEFINE_boolean("use_volumetric", False,
                             "Sets whether to use volumetric data or not.")
+tf.app.flags.DEFINE_boolean("use_masked_train_set", False,
+                            "Sets whether to use the masked output dataset for training.")
+tf.app.flags.DEFINE_string("masked_train_data_dir", DEFAULT_OUTPUT_DATA_DIR,
+                           "Sets the dir in which to find data for training. "
+                           "Defaults to data_output_masks/.")
 
 # Split
 tf.app.flags.DEFINE_string("cv_type", "lpocv",
