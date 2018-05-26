@@ -487,6 +487,8 @@ class ATLASModel(object):
     recall_img_total = 0.
     precision_img_total = 0.
     num_examples = 0
+    num_examples_recall = 0
+    num_examples_precision = 0
 
     sbg = SliceBatchGenerator(input_paths,
                               target_mask_paths,
@@ -508,12 +510,20 @@ class ATLASModel(object):
           
         
         dice_coefficient = utils.dice_coefficient(predicted_mask, target_mask)
-        recall_pix_example = 0.
-        precision_pix_example = 0.
+        recall_pix_example = utils.find_recall(predicted_mask, target_mask)
+        precision_pix_example = utils.find_precision(predicted_mask, target_mask)
         recall_img_example = 0.
         precision_img_example = 0.
         
         if recall_pix_example >= 0.0:
+          recall_pix_total += recall_pix_example
+          recall_img_total += 1
+          num_examples_recall += 1
+        
+        if precision_pix_example >= 0.0:
+          precision_pix_total += precision_pix_example
+          precision_img_total += 1
+          num_examples_precision += 1
         
         if dice_coefficient >= 0.0:
           dice_coefficient_total += dice_coefficient
@@ -542,10 +552,10 @@ class ATLASModel(object):
         break
 
     dice_coefficient_mean = dice_coefficient_total / num_examples
-    recall_pix = recall_pix_total/num_examples
-    precision_pix = precision_pix_total/num_examples
-    recall_img = recall_img_total/num_examples
-    precision_img = precision_img_total/num_examples
+    recall_pix = recall_pix_total/num_examples_recall
+    precision_pix = precision_pix_total/num_examples_precision
+    recall_img = recall_img_total/num_examples_recall
+    precision_img = precision_img_total/num_examples_precision
 
     toc = time.time()
     logging.info(f"Calculating accuracy metrics took {toc-tic} sec.")

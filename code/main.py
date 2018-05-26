@@ -230,6 +230,18 @@ def main(_):
                                                         num_samples=1000,
                                                         plot=True)
       logging.info(f"dev dice_coefficient: {dev_dice}")
+
+      dev_recall_pix,dev_precision_pix,dev_recall_img,dev_precision_img = atlas_model.calculate_recall_precision(sess,
+                                                        dev_input_paths,
+                                                        dev_target_mask_paths,
+                                                        "dev",
+                                                        num_samples=1000,
+                                                        plot=True)
+      logging.info(f"dev recall_pix: {dev_recall_pix}")
+      logging.info(f"dev precision_pix: {dev_precision_pix}")
+      logging.info(f"dev recall_img: {dev_recall_img}")
+      logging.info(f"dev precision_img: {dev_precision_img}")
+
   elif FLAGS.mode == "save_output_masks":    #run with this line: python main.py --experiment_name=0002 --mode=save_output_masks --num_epochs=3 --eval_every=100 --print_every=1 --save_every=100 --summary_every=20 --model_name=ATLASModel
 
    
