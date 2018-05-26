@@ -8,6 +8,21 @@ def dice_coefficient(predicted_mask, target_mask):
   dice = 2 * tp / (2 * tp + fp_fn)
   return dice
 
+def find_recall(predicted_mask, target_mask): # TP/P
+  tp = np.sum(np.logical_and(predicted_mask, target_mask)) # TP
+  tp_fn = np.sum(target_mask) # P
+  if (tp_fn) == 0: return -1  # mask is entirely 0
+  recall = tp/tp_fn
+  return recall
+
+def find_precision(predicted_mask, target_mask): # TP/(TP+FP)
+  tp = np.sum(np.logical_and(predicted_mask, target_mask)) # TP
+  tp_fp = np.sum(predicted_mask) # (TP+FP)
+  if (tp_fp) == 0: return -1  # mask is entirely 0
+  precision = tp/tp_fp
+  return precision
+
+
 def get_block_sizes(resnet_size):
   """
   Retrieves the number of block layers to use in the ResNet model, throwing an

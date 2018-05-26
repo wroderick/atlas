@@ -443,6 +443,115 @@ class ATLASModel(object):
     return dice_coefficient_mean
 
 
+  def calculate_recall_precision(self,
+                                 sess,
+                                 input_paths,
+                                 target_mask_paths,
+                                 dataset,
+                                 num_samples=100,
+                                 plot=False,
+                                 print_to_screen=False):
+    """
+    Calculates the recall and precision accuracy metrics for a dataset, represented by a
+    list of {input_paths} and {target_mask_paths}.
+
+    Inputs:
+    - sess: A TensorFlow Session object.
+    - input_paths: A list of Python strs that represent pathnames to input
+      image files.
+    - target_mask_paths: A list of Python strs that represent pathnames to
+      target mask files.
+    - dataset: A Python str that represents the dataset being tested. Options:
+      {train,dev}. Just for logging purposes.
+    - num_samples: A Python int that represents the number of samples to test.
+      If num_samples=None, then test whole dataset.
+    - plot: A Python bool. If True, plots each example to screen.
+
+    Outputs:
+    - recall_pix: A Python float that represents the average recall
+       across the sampled examples.
+    - precision_pix: A Python float that represents the average precision
+       across the sampled examples.
+    - recall_img: A Python float that represents how frequently we ouptut
+        a mask region that overlapped with the target region over the total number of examples.
+    - precision_img: A Python float that represents how frequently we ouptut
+        a mask region when there is a target mask region over the total number of examples.
+    """
+    logging.info(f"Calculating accuracy metrics for {num_samples} examples "
+                 f"from {dataset}...")
+    tic = time.time()
+
+    dice_coefficient_total = 0.
+    recall_pix_total = 0.
+    precision_pix_total = 0.
+    recall_img_total = 0.
+    precision_img_total = 0.
+    num_examples = 0
+
+    sbg = SliceBatchGenerator(input_paths,
+                              target_mask_paths,
+                              self.FLAGS.batch_size,
+                              shape=(self.FLAGS.slice_height,
+                                     self.FLAGS.slice_width),
+                              use_fake_target_masks=self.FLAGS.use_fake_target_masks)
+    for batch in sbg.get_batch():
+      predicted_masks = self.get_predicted_masks_for_batch(sess, batch)
+
+      zipped_masks = zip(predicted_masks,
+                         batch.target_masks_batch,
+                         batch.input_paths_batch,
+                         batch.target_mask_path_lists_batch)
+      for idx, (predicted_mask,
+                target_mask,
+                input_path,
+                target_mask_path_list) in enumerate(zipped_masks):
+          
+        
+        dice_coefficient = utils.dice_coefficient(predicted_mask, target_mask)
+        recall_pix_example = 0.
+        precision_pix_example = 0.
+        recall_img_example = 0.
+        precision_img_example = 0.
+        
+        if recall_pix_example >= 0.0:
+        
+        if dice_coefficient >= 0.0:
+          dice_coefficient_total += dice_coefficient
+          num_examples += 1
+
+          if print_to_screen:
+            # Whee! We predicted at least one lesion pixel!
+            logging.info(f"Dice coefficient of valid example {num_examples}: "
+                         f"{dice_coefficient}")
+          if plot:
+            f, axarr = plt.subplots(1, 2)
+            f.suptitle(input_path)
+            axarr[0].imshow(predicted_mask)
+            axarr[0].set_title("Predicted")
+            axarr[1].imshow(target_mask)
+            axarr[1].set_title("Target")
+            examples_dir = os.path.join(self.FLAGS.train_dir, "examples")
+            if not os.path.exists(examples_dir):
+              os.makedirs(examples_dir)
+            f.savefig(os.path.join(examples_dir, str(num_examples).zfill(4)))
+
+        if num_samples != None and num_examples >= num_samples:
+          break
+
+      if num_samples != None and num_examples >= num_samples:
+        break
+
+    dice_coefficient_mean = dice_coefficient_total / num_examples
+    recall_pix = recall_pix_total/num_examples
+    precision_pix = precision_pix_total/num_examples
+    recall_img = recall_img_total/num_examples
+    precision_img = precision_img_total/num_examples
+
+    toc = time.time()
+    logging.info(f"Calculating accuracy metrics took {toc-tic} sec.")
+    return recall_pix,precision_pix,recall_img,precision_img
+
+
   def train(self,
             sess,
             train_input_paths,
