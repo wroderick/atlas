@@ -287,10 +287,12 @@ def main(_):
         output_masked_image = curr_input * predicted_mask
         output_masked_image = np.squeeze(output_masked_image)
       
-        # dilate masked image
         if FLAGS.dilation:
+            #dilate the mask (image is 0s and 1s)
             dilated_image = ndimage.binary_dilation(output_masked_image, structure=struct1, 
-                                 ).astype(output_masked_image.dtype)    
+                                 ).astype(output_masked_image.dtype)   
+            #mask the original image with the dilated masks
+            dilated_image = curr_input[0,:,:] * dilated_image
         #output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
         output_masked_image = np.dstack((dilated_image,dilated_image,dilated_image))
         #create new filepath to output masked images
