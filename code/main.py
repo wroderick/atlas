@@ -272,7 +272,7 @@ def main(_):
                             recursive=True)
       #iter = 0
       if FLAGS.dilation:
-        struct1 = ndimage.generate_binary_structure(2, 1) # 2x2 with connectivity 1 for dilating
+        struct1 = np.ones((4,4))
 
       for curr_file_path in slice_paths:
         curr_img = io.imread(curr_file_path)
@@ -286,11 +286,13 @@ def main(_):
         predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_input)
         output_masked_image = curr_input * predicted_mask
         output_masked_image = np.squeeze(output_masked_image)
+      
         # dilate masked image
         if FLAGS.dilation:
-          ndimage.binary_dilation(output_masked_image, structure=struct1, 
-                                  output=output_masked_image).astype(output_masked_image.dtype)               
-        output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
+            dilated_image = ndimage.binary_dilation(output_masked_image, structure=struct1, 
+                                 ).astype(output_masked_image.dtype)    
+        #output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
+        output_masked_image = np.dstack((dilated_image,dilated_image,dilated_image))
         #create new filepath to output masked images
         old_folderpath = os.path.split(curr_file_path)[0]
         filename = os.path.split(curr_file_path)[1]
