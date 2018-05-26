@@ -80,6 +80,8 @@ tf.app.flags.DEFINE_boolean("use_masked_train_set", False,
 tf.app.flags.DEFINE_string("original_data_dir", DEFAULT_DATA_DIR,
                            "Sets the dir in which to find original train target dataset masks. "
                            "Defaults to data/.")
+tf.app.flags.DEFINE_boolean("dilation", False,
+                            "Sets whether to use dilation or not.")
 
 # Split
 tf.app.flags.DEFINE_string("cv_type", "lpocv",
@@ -269,7 +271,9 @@ def main(_):
       slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
                             recursive=True)
       #iter = 0
-      struct1 = ndimage.generate_binary_structure(2, 1) # 2x2 with connectivity 1 for dilating
+      if FLAGS.dilation:
+        struct1 = ndimage.generate_binary_structure(2, 1) # 2x2 with connectivity 1 for dilating
+
       for curr_file_path in slice_paths:
         curr_img = io.imread(curr_file_path)
         # opens input, resizes it, converts to a numpy array
@@ -281,9 +285,11 @@ def main(_):
         curr_input = np.expand_dims(curr_input,0)
         predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_input)
         output_masked_image = curr_input * predicted_mask
-        # dilate masked image
         output_masked_image = np.squeeze(output_masked_image)
-        ndimage.binary_dilation(output_masked_image, structure=struct1, output=output_masked_image).astype(output_masked_image.dtype)               
+        # dilate masked image
+        if FLAGS.dilation:
+          ndimage.binary_dilation(output_masked_image, structure=struct1, 
+                                  output=output_masked_image).astype(output_masked_image.dtype)               
         output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
         #create new filepath to output masked images
         old_folderpath = os.path.split(curr_file_path)[0]
