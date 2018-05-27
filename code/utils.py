@@ -11,6 +11,8 @@ def dice_coefficient(predicted_mask, target_mask):
 def find_recall(predicted_mask, target_mask): # TP/P
   tp = np.sum(np.logical_and(predicted_mask, target_mask)) # TP
   tp_fn = np.sum(target_mask) # P
+  print(target_mask)
+  print(predicted_mask)
   if (tp_fn) == 0: return -1  # mask is entirely 0
   recall = tp/tp_fn
   return recall

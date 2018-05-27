@@ -443,7 +443,7 @@ class ATLASModel(object):
     return dice_coefficient_mean
 
 
-  def calculate_recall_precision(self,
+  def calculate_acc_metrics(self,
                                  sess,
                                  input_paths,
                                  target_mask_paths,
@@ -511,6 +511,7 @@ class ATLASModel(object):
         
         dice_coefficient = utils.dice_coefficient(predicted_mask, target_mask)
         recall_pix_example = utils.find_recall(predicted_mask, target_mask)
+        #print(recall_pix_example)
         precision_pix_example = utils.find_precision(predicted_mask, target_mask)
         recall_img_example = 0.
         precision_img_example = 0.
@@ -559,7 +560,7 @@ class ATLASModel(object):
 
     toc = time.time()
     logging.info(f"Calculating accuracy metrics took {toc-tic} sec.")
-    return recall_pix,precision_pix,recall_img,precision_img
+    return dice_coefficient_mean,recall_pix,precision_pix,recall_img,precision_img
 
 
   def train(self,

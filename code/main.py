@@ -225,20 +225,21 @@ def main(_):
       # Shows examples from the dev set
       _, _, dev_input_paths, dev_target_mask_paths =\
         setup_train_dev_split(FLAGS)
-      dev_dice = atlas_model.calculate_dice_coefficient(sess,
-                                                        dev_input_paths,
-                                                        dev_target_mask_paths,
-                                                        "dev",
-                                                        num_samples=1000,
-                                                        plot=True)
-      logging.info(f"dev dice_coefficient: {dev_dice}")
+#      dev_dice = atlas_model.calculate_dice_coefficient(sess,
+#                                                        dev_input_paths,
+#                                                        dev_target_mask_paths,
+#                                                        "dev",
+#                                                        num_samples=1000,
+#                                                        plot=True)
+#      logging.info(f"dev dice_coefficient: {dev_dice}")
 
-      dev_recall_pix,dev_precision_pix,dev_recall_img,dev_precision_img = atlas_model.calculate_recall_precision(sess,
+      dev_dice,dev_recall_pix,dev_precision_pix,dev_recall_img,dev_precision_img = atlas_model.calculate_acc_metrics(sess,
                                                         dev_input_paths,
                                                         dev_target_mask_paths,
                                                         "dev",
-                                                        num_samples=1000,
-                                                        plot=True)
+                                                        num_samples=100,
+                                                        plot=False)
+      logging.info(f"dev dice_coefficient: {dev_dice}")
       logging.info(f"dev recall_pix: {dev_recall_pix}")
       logging.info(f"dev precision_pix: {dev_precision_pix}")
       logging.info(f"dev recall_img: {dev_recall_img}")
