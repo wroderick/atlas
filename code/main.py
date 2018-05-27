@@ -237,8 +237,8 @@ def main(_):
                                                         dev_input_paths,
                                                         dev_target_mask_paths,
                                                         "dev",
-                                                        num_samples=100,
-                                                        plot=False)
+                                                        num_samples=1000,
+                                                        plot=True)
       logging.info(f"dev dice_coefficient: {dev_dice}")
       logging.info(f"dev recall_pix: {dev_recall_pix}")
       logging.info(f"dev precision_pix: {dev_precision_pix}")

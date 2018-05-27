@@ -511,20 +511,21 @@ class ATLASModel(object):
         
         dice_coefficient = utils.dice_coefficient(predicted_mask, target_mask)
         recall_pix_example = utils.find_recall(predicted_mask, target_mask)
-        #print(recall_pix_example)
         precision_pix_example = utils.find_precision(predicted_mask, target_mask)
         recall_img_example = 0.
         precision_img_example = 0.
         
         if recall_pix_example >= 0.0:
           recall_pix_total += recall_pix_example
-          recall_img_total += 1
           num_examples_recall += 1
+          if recall_pix_example > 0.0:
+            recall_img_total += 1
         
         if precision_pix_example >= 0.0:
           precision_pix_total += precision_pix_example
-          precision_img_total += 1
           num_examples_precision += 1
+          if precision_pix_example > 0.0:
+            precision_img_total += 1
         
         if dice_coefficient >= 0.0:
           dice_coefficient_total += dice_coefficient

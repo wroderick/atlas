@@ -10,16 +10,14 @@ def dice_coefficient(predicted_mask, target_mask):
 
 def find_recall(predicted_mask, target_mask): # TP/P
   tp = np.sum(np.logical_and(predicted_mask, target_mask)) # TP
-  tp_fn = np.sum(target_mask) # P
-  print(target_mask)
-  print(predicted_mask)
+  tp_fn = np.sum(target_mask > 0.) # P
   if (tp_fn) == 0: return -1  # mask is entirely 0
   recall = tp/tp_fn
   return recall
 
 def find_precision(predicted_mask, target_mask): # TP/(TP+FP)
   tp = np.sum(np.logical_and(predicted_mask, target_mask)) # TP
-  tp_fp = np.sum(predicted_mask) # (TP+FP)
+  tp_fp = np.sum(predicted_mask > 0.) # (TP+FP)
   if (tp_fp) == 0: return -1  # mask is entirely 0
   precision = tp/tp_fp
   return precision
