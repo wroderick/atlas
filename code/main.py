@@ -238,7 +238,7 @@ def main(_):
                                                         dev_target_mask_paths,
                                                         "dev",
                                                         num_samples=1000,
-                                                        plot=True)
+                                                        plot=False)
       logging.info(f"dev dice_coefficient: {dev_dice}")
       logging.info(f"dev recall_pix: {dev_recall_pix}")
       logging.info(f"dev precision_pix: {dev_precision_pix}")
@@ -295,7 +295,9 @@ def main(_):
             #mask the original image with the dilated masks
             dilated_image = curr_input[0,:,:] * dilated_image
         #output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
-        output_masked_image = np.dstack((dilated_image,dilated_image,dilated_image))
+            output_masked_image = np.dstack((dilated_image,dilated_image,dilated_image))
+        else:
+            output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image)) 
         #create new filepath to output masked images
         old_folderpath = os.path.split(curr_file_path)[0]
         filename = os.path.split(curr_file_path)[1]
