@@ -82,6 +82,8 @@ tf.app.flags.DEFINE_string("original_data_dir", DEFAULT_DATA_DIR,
                            "Defaults to data/.")
 tf.app.flags.DEFINE_boolean("dilation", False,
                             "Sets whether to use dilation or not.")
+tf.app.flags.DEFINE_boolean("gaussian_filter", False,
+                            "Sets whether to use 2D gaussian filter or not.")
 
 # Split
 tf.app.flags.DEFINE_string("cv_type", "lpocv",
@@ -296,6 +298,10 @@ def main(_):
             dilated_image = curr_input[0,:,:] * dilated_image
         #output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image))
             output_masked_image = np.dstack((dilated_image,dilated_image,dilated_image))
+        elif FLAGS.gaussian_filter:
+            #apply gaussian filter to image
+            gauss_filt_image = ndimage.filters.gaussian_filter(output_masked_image,sigma=1)
+            output_masked_image = np.dstack((gauss_filt_image,gauss_filt_image,gauss_filt_image))
         else:
             output_masked_image = np.dstack((output_masked_image,output_masked_image,output_masked_image)) 
         #create new filepath to output masked images
