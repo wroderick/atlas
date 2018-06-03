@@ -298,6 +298,30 @@ class ATLASModel(object):
     output_feed = { "predicted_masks": self.predicted_masks_op }
     results = sess.run(output_feed, input_feed)
     return results["predicted_masks"]
+  
+  def get_grads_wrt_input(self, sess, input_example):
+    """
+    Runs a forward-pass only; gets the gradient with respect to the input.
+
+    Inputs:
+    - sess: A TensorFlow Session object.
+    - input_example: An image.
+
+    Outputs:
+    - grads_wrt_input: A numpy array of the shape of an image.
+    """
+    input_feed = {}
+    input_feed[self.batch_size_op] = self.FLAGS.batch_size
+    input_feed[self.inputs_op] = input_example
+    # keep_prob not input, so it will default to 1 i.e. no dropout
+    
+    grads_wrt_input_tensor = tf.gradients(cost, self.x)[0]
+    _, grads_wrt_input = sess.run([optimizer, grads_wrt_input_tensor],
+                                  feed_dict=feed_dict)
+
+    output_feed = { "grads wrt input": self.predicted_masks_op }
+    results = sess.run(output_feed, input_feed)
+    return results["predicted_masks"]
 
 
   def calculate_loss(self,

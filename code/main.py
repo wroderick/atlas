@@ -318,6 +318,39 @@ def main(_):
         #outpath = "../data_output_masks/"
         #io.imsave(outpath + str(iter) + '.jpg',output_masked_image,quality=100)
 
+  elif FLAGS.mode == "saliency_map":
+    with tf.Session(config=config) as sess:
+      # Sets logging configuration
+      logging.basicConfig(level=logging.INFO)
+
+      # Loads the most recent model
+      initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=True)
+
+      prefix = os.path.join(FLAGS.data_dir, "ATLAS_R1.1")
+      new_prefix = os.path.join(FLAGS.output_data_dir, "ATLAS_R1.1")
+      if FLAGS.input_regex == None:
+        input_paths_regex = "Site*/**/*_t1w_deface_stx/*.jpg"
+      else:
+        input_paths_regex = FLAGS.input_regex
+    
+      slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
+                            recursive=True)
+
+
+      for curr_file_path in slice_paths:
+        curr_img = io.imread(curr_file_path)
+        # opens input, resizes it, converts to a numpy array
+        curr_input = Image.open(curr_file_path).convert("L")
+        curr_shape=(FLAGS.slice_height,
+                    FLAGS.slice_width)
+        curr_input = curr_input.crop((0, 0) + curr_shape[::-1])
+        curr_input = np.asarray(curr_input) / 255.0
+        curr_input = np.expand_dims(curr_input,0)
+
+        grads_wrt_input = atlas_model.get_grads_wrt_input(sess,curr_input)
+        grads_wrt_input = grads_wrt_input/max(grads_wrt_input)
+
+
 
 if __name__ == "__main__":
   tf.app.run()
