@@ -313,15 +313,13 @@ class ATLASModel(object):
     input_feed = {}
     input_feed[self.batch_size_op] = self.FLAGS.batch_size
     input_feed[self.inputs_op] = input_example
-    # keep_prob not input, so it will default to 1 i.e. no dropout
+    print(input_example)
     
-    grads_wrt_input_tensor = tf.gradients(cost, self.x)[0]
-    _, grads_wrt_input = sess.run([optimizer, grads_wrt_input_tensor],
-                                  feed_dict=feed_dict)
-
-    output_feed = { "grads wrt input": self.predicted_masks_op }
-    results = sess.run(output_feed, input_feed)
-    return results["predicted_masks"]
+    grads_wrt_input_tensor = tf.gradients(self.loss, self.inputs_op)[0]
+    #opt = tf.train.AdamOptimizer(learning_rate=self.FLAGS.learning_rate).minimize(self.loss)
+    #grads_wrt_input = sess.run([grads_wrt_input_tensor],feed_dict=input_feed)
+    grads_wrt_input = sess.run(grads_wrt_input_tensor)
+    return grads_wrt_input
 
 
   def calculate_loss(self,

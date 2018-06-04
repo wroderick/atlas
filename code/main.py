@@ -318,7 +318,7 @@ def main(_):
         #outpath = "../data_output_masks/"
         #io.imsave(outpath + str(iter) + '.jpg',output_masked_image,quality=100)
 
-  elif FLAGS.mode == "saliency_map":
+  elif FLAGS.mode == "saliency_map": #run with this line: python main.py --experiment_name=0002 --mode=saliency_map --model_name=ATLASModel
     with tf.Session(config=config) as sess:
       # Sets logging configuration
       logging.basicConfig(level=logging.INFO)
@@ -339,6 +339,10 @@ def main(_):
 
       for curr_file_path in slice_paths:
         curr_img = io.imread(curr_file_path)
+
+        imgplot = plt.imshow(curr_img)
+        plt.show()
+
         # opens input, resizes it, converts to a numpy array
         curr_input = Image.open(curr_file_path).convert("L")
         curr_shape=(FLAGS.slice_height,
@@ -348,7 +352,11 @@ def main(_):
         curr_input = np.expand_dims(curr_input,0)
 
         grads_wrt_input = atlas_model.get_grads_wrt_input(sess,curr_input)
+        print(grads_wrt_input)
         grads_wrt_input = grads_wrt_input/max(grads_wrt_input)
+        output_grads_wrt_input_image = np.dstack((grads_wrt_input,grads_wrt_input,grads_wrt_input))
+        imgplot = plt.imshow(output_grads_wrt_input_image)
+        plt.show()
 
 
 
