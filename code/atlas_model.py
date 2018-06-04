@@ -311,14 +311,17 @@ class ATLASModel(object):
     - grads_wrt_input: A numpy array of the shape of an image.
     """
     input_feed = {}
-    input_feed[self.batch_size_op] = self.FLAGS.batch_size
+    input_feed[self.batch_size_op] = 1
     input_feed[self.inputs_op] = input_example
     input_feed[self.target_masks_op] = target_example
     
-    grads_wrt_input_tensor = tf.gradients(self.loss, self.inputs_op)[0]
+    #output_feed = { "predicted_masks": self.predicted_masks_op }
+    #results = sess.run(output_feed, input_feed)
+    #predicted_masks results["predicted_masks"]
     
-    #opt = tf.train.AdamOptimizer(learning_rate=self.FLAGS.learning_rate).minimize(self.loss)
-    #grads_wrt_input = sess.run([grads_wrt_input_tensor],feed_dict=input_feed)
+    #grads_wrt_input_tensor = tf.gradients(self.predicted_masks_op, self.inputs_op)[0]
+    grads_wrt_input_tensor = tf.gradients(self.predicted_mask_probs_op, self.inputs_op)[0]
+    #grads_wrt_input_tensor = tf.gradients(self.loss, self.inputs_op)[0]
     grads_wrt_input = sess.run(grads_wrt_input_tensor,feed_dict=input_feed)
     return grads_wrt_input
 

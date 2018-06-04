@@ -127,6 +127,10 @@ tf.app.flags.DEFINE_integer("dev_num_samples", None,
                             "Sets the number of samples to evaluate from the "
                             "dev set. None means evaluate on all.")
 
+# Saliency
+tf.app.flags.DEFINE_integer("example_num", 0,
+                            "Sets which sample to show from the dev set. ")
+
 # Model
 tf.app.flags.DEFINE_string("model_name", "ATLASModel",
                            "Sets the name of the model to use; the name must "
@@ -137,6 +141,7 @@ tf.app.flags.DEFINE_integer("slice_width", 196, "Sets the image width.")
 
 FLAGS = tf.app.flags.FLAGS
 os.environ["CUDA_VISIBLE_DEVICES"] = str(FLAGS.gpu)
+
 
 
 def initialize_model(sess, model, train_dir, expect_exists=False):
@@ -318,40 +323,20 @@ def main(_):
         #outpath = "../data_output_masks/"
         #io.imsave(outpath + str(iter) + '.jpg',output_masked_image,quality=100)
 
-  elif FLAGS.mode == "saliency_map": #run with this line: python main.py --experiment_name=0002 --mode=saliency_map --model_name=ATLASModel
+  elif FLAGS.mode == "saliency_map": #run with this line: python main.py --experiment_name=0002 --mode=saliency_map --model_name=ATLASModel --example_num=2
+                                    # examples that work well: 2, 20
     with tf.Session(config=config) as sess:
       # Sets logging configuration
       logging.basicConfig(level=logging.INFO)
 
       # Loads the most recent model
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=True)
-
-#      prefix = os.path.join(FLAGS.data_dir, "ATLAS_R1.1")
-#      new_prefix = os.path.join(FLAGS.output_data_dir, "ATLAS_R1.1")
-#      if FLAGS.input_regex == None:
-#        input_paths_regex = "Site*/**/*_t1w_deface_stx/*.jpg"
-#      else:
-#        input_paths_regex = FLAGS.input_regex
-#
-#      slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
-#                            recursive=True)
-
-
+      
+      # Gets the image from the dev set
       _, _, dev_input_paths, dev_target_mask_paths =\
                 setup_train_dev_split(FLAGS)
-      example_num = 2
-      curr_dev_input_path = dev_input_paths[example_num][0]
-      curr_dev_target_mask_path = dev_target_mask_paths[example_num][0][0]
-
-      print(curr_dev_input_path)
-      print(curr_dev_target_mask_path)
-
-#for curr_file_path in slice_paths:
-          #print(curr_file_path)
-#curr_img = io.imread(curr_file_path)
-      curr_img = io.imread(curr_dev_input_path)
-      imgplot = plt.imshow(curr_img)
-      plt.show()
+      curr_dev_input_path = dev_input_paths[FLAGS.example_num][0]
+      curr_dev_target_mask_path = dev_target_mask_paths[FLAGS.example_num][0][0]
 
       # opens input, resizes it, converts to a numpy array
       curr_input = Image.open(curr_dev_input_path).convert("L")
@@ -359,24 +344,42 @@ def main(_):
                     FLAGS.slice_width)
       curr_input = curr_input.crop((0, 0) + curr_shape[::-1])
       curr_input = np.asarray(curr_input) / 255.0
+      curr_input_img = np.dstack((curr_input,curr_input,curr_input))
       curr_input = np.expand_dims(curr_input,0)
 
       # opens target, resizes it, converts to a numpy array
-      curr_target_img = io.imread(curr_dev_target_mask_path)
-      imgplot = plt.imshow(curr_target_img)
-      plt.show()
       curr_target = Image.open(curr_dev_target_mask_path).convert("L")
       curr_target_shape=(FLAGS.slice_height,
                     FLAGS.slice_width)
       curr_target = curr_target.crop((0, 0) + curr_target_shape[::-1])
       curr_target = np.asarray(curr_target) / 255.0
+      curr_target_img = np.dstack((curr_target,curr_target,curr_target))
       curr_target = np.expand_dims(curr_target,0)
 
+      # gets the predicted mask
+      predicted_mask = atlas_model.get_predicted_masks_for_training_example(sess,curr_input)
+      predicted_mask_img = np.squeeze(predicted_mask)
+      predicted_mask_img = predicted_mask_img.astype(float)
+      predicted_mask_img = np.dstack((predicted_mask_img,predicted_mask_img,predicted_mask_img))
+    
+      # Finds the gradients with respect to the input
       grads_wrt_input = atlas_model.get_grads_wrt_input(sess,curr_input,curr_target)
       grads_wrt_input = np.squeeze(grads_wrt_input)
-      grads_wrt_input = np.round_(grads_wrt_input/np.amax(grads_wrt_input)*255.0)
+      grads_wrt_input = np.absolute(grads_wrt_input)
+      grads_wrt_input = grads_wrt_input/np.amax(grads_wrt_input)
       output_grads_wrt_input_image = np.dstack((grads_wrt_input,grads_wrt_input,grads_wrt_input))
-      imgplot = plt.imshow(output_grads_wrt_input_image)
+      
+      # Plot
+      plt.subplot(1,3,1)
+      plt.imshow(curr_input_img)
+      plt.subplot(1,3,2)
+      plt.imshow(curr_input_img)
+      curr_img_mask_overlay = np.zeros(curr_target_img.shape)
+      curr_img_mask_overlay[:,:,0] = curr_target_img[:,:,1]
+      curr_img_mask_overlay[:,:,2] = predicted_mask_img[:,:,1]
+      plt.imshow(curr_img_mask_overlay, alpha=0.4)
+      plt.subplot(1,3,3)
+      plt.imshow(output_grads_wrt_input_image)
       plt.show()
 
 
