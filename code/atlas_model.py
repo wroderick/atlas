@@ -299,7 +299,7 @@ class ATLASModel(object):
     results = sess.run(output_feed, input_feed)
     return results["predicted_masks"]
   
-  def get_grads_wrt_input(self, sess, input_example):
+  def get_grads_wrt_input(self, sess, input_example, target_example):
     """
     Runs a forward-pass only; gets the gradient with respect to the input.
 
@@ -313,12 +313,13 @@ class ATLASModel(object):
     input_feed = {}
     input_feed[self.batch_size_op] = self.FLAGS.batch_size
     input_feed[self.inputs_op] = input_example
-    print(input_example)
+    input_feed[self.target_masks_op] = target_example
     
     grads_wrt_input_tensor = tf.gradients(self.loss, self.inputs_op)[0]
+    
     #opt = tf.train.AdamOptimizer(learning_rate=self.FLAGS.learning_rate).minimize(self.loss)
     #grads_wrt_input = sess.run([grads_wrt_input_tensor],feed_dict=input_feed)
-    grads_wrt_input = sess.run(grads_wrt_input_tensor)
+    grads_wrt_input = sess.run(grads_wrt_input_tensor,feed_dict=input_feed)
     return grads_wrt_input
 
 

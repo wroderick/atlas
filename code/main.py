@@ -326,38 +326,58 @@ def main(_):
       # Loads the most recent model
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=True)
 
-      prefix = os.path.join(FLAGS.data_dir, "ATLAS_R1.1")
-      new_prefix = os.path.join(FLAGS.output_data_dir, "ATLAS_R1.1")
-      if FLAGS.input_regex == None:
-        input_paths_regex = "Site*/**/*_t1w_deface_stx/*.jpg"
-      else:
-        input_paths_regex = FLAGS.input_regex
-    
-      slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
-                            recursive=True)
+#      prefix = os.path.join(FLAGS.data_dir, "ATLAS_R1.1")
+#      new_prefix = os.path.join(FLAGS.output_data_dir, "ATLAS_R1.1")
+#      if FLAGS.input_regex == None:
+#        input_paths_regex = "Site*/**/*_t1w_deface_stx/*.jpg"
+#      else:
+#        input_paths_regex = FLAGS.input_regex
+#
+#      slice_paths = glob.glob(os.path.join(prefix, input_paths_regex),
+#                            recursive=True)
 
 
-      for curr_file_path in slice_paths:
-        curr_img = io.imread(curr_file_path)
+      _, _, dev_input_paths, dev_target_mask_paths =\
+                setup_train_dev_split(FLAGS)
+      example_num = 2
+      curr_dev_input_path = dev_input_paths[example_num][0]
+      curr_dev_target_mask_path = dev_target_mask_paths[example_num][0][0]
 
-        imgplot = plt.imshow(curr_img)
-        plt.show()
+      print(curr_dev_input_path)
+      print(curr_dev_target_mask_path)
 
-        # opens input, resizes it, converts to a numpy array
-        curr_input = Image.open(curr_file_path).convert("L")
-        curr_shape=(FLAGS.slice_height,
+#for curr_file_path in slice_paths:
+          #print(curr_file_path)
+#curr_img = io.imread(curr_file_path)
+      curr_img = io.imread(curr_dev_input_path)
+      imgplot = plt.imshow(curr_img)
+      plt.show()
+
+      # opens input, resizes it, converts to a numpy array
+      curr_input = Image.open(curr_dev_input_path).convert("L")
+      curr_shape=(FLAGS.slice_height,
                     FLAGS.slice_width)
-        curr_input = curr_input.crop((0, 0) + curr_shape[::-1])
-        curr_input = np.asarray(curr_input) / 255.0
-        curr_input = np.expand_dims(curr_input,0)
+      curr_input = curr_input.crop((0, 0) + curr_shape[::-1])
+      curr_input = np.asarray(curr_input) / 255.0
+      curr_input = np.expand_dims(curr_input,0)
 
-        grads_wrt_input = atlas_model.get_grads_wrt_input(sess,curr_input)
-        print(grads_wrt_input)
-        grads_wrt_input = grads_wrt_input/max(grads_wrt_input)
-        output_grads_wrt_input_image = np.dstack((grads_wrt_input,grads_wrt_input,grads_wrt_input))
-        imgplot = plt.imshow(output_grads_wrt_input_image)
-        plt.show()
+      # opens target, resizes it, converts to a numpy array
+      curr_target_img = io.imread(curr_dev_target_mask_path)
+      imgplot = plt.imshow(curr_target_img)
+      plt.show()
+      curr_target = Image.open(curr_dev_target_mask_path).convert("L")
+      curr_target_shape=(FLAGS.slice_height,
+                    FLAGS.slice_width)
+      curr_target = curr_target.crop((0, 0) + curr_target_shape[::-1])
+      curr_target = np.asarray(curr_target) / 255.0
+      curr_target = np.expand_dims(curr_target,0)
 
+      grads_wrt_input = atlas_model.get_grads_wrt_input(sess,curr_input,curr_target)
+      grads_wrt_input = np.squeeze(grads_wrt_input)
+      grads_wrt_input = np.round_(grads_wrt_input/np.amax(grads_wrt_input)*255.0)
+      output_grads_wrt_input_image = np.dstack((grads_wrt_input,grads_wrt_input,grads_wrt_input))
+      imgplot = plt.imshow(output_grads_wrt_input_image)
+      plt.show()
 
 
 if __name__ == "__main__":
