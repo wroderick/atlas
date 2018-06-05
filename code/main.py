@@ -372,15 +372,20 @@ def main(_):
       # Plot
       plt.subplot(1,3,1)
       plt.imshow(curr_input_img)
+      plt.axis('off')
       plt.subplot(1,3,2)
       plt.imshow(curr_input_img)
       curr_img_mask_overlay = np.zeros(curr_target_img.shape)
       curr_img_mask_overlay[:,:,0] = curr_target_img[:,:,1]
-      curr_img_mask_overlay[:,:,2] = predicted_mask_img[:,:,1]
-      plt.imshow(curr_img_mask_overlay, alpha=0.4)
+      curr_img_mask_overlay[:,:,1] = predicted_mask_img[:,:,1]
+      plt.imshow(curr_img_mask_overlay, alpha=0.2)
+      plt.axis('off')
       plt.subplot(1,3,3)
       plt.imshow(output_grads_wrt_input_image)
+      plt.axis('off')
+      plt.savefig("../plots/SaliencyMap.pdf",transparent=True, bbox_inches='tight',dpi=3000)
       plt.show()
+
 
 
 if __name__ == "__main__":
