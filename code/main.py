@@ -127,6 +127,11 @@ tf.app.flags.DEFINE_integer("dev_num_samples", None,
                             "Sets the number of samples to evaluate from the "
                             "dev set. None means evaluate on all.")
 
+#Eval
+tf.app.flags.DEFINE_string("eval_filepath", "data",
+                            "Sets which filepath we use to evaluate the dev set.")
+
+
 # Saliency
 tf.app.flags.DEFINE_integer("example_num", 0,
                             "Sets which sample to show from the dev set. ")
@@ -221,7 +226,7 @@ def main(_):
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=False)
       # Trains the model
       atlas_model.train(sess, *setup_train_dev_split(FLAGS))
-  elif FLAGS.mode == "eval":
+  elif FLAGS.mode == "eval": #to use different eval filepath, python main.py --experiment_name=0015 --eval_filepath="data_output_masks0015"
     with tf.Session(config=config) as sess:
       # Sets logging configuration
       logging.basicConfig(level=logging.INFO)
@@ -232,6 +237,12 @@ def main(_):
       # Shows examples from the dev set
       _, _, dev_input_paths, dev_target_mask_paths =\
         setup_train_dev_split(FLAGS)
+       
+      #will change dev input paths if you want to (otherwise default is data)
+      for i in xrange(len(dev_input_paths)):
+          filepath = dev_input_paths[i][0]
+          dev_input_paths[i][0] = filepath.replace('data',FLAGS.eval_filepath)
+
 #      dev_dice = atlas_model.calculate_dice_coefficient(sess,
 #                                                        dev_input_paths,
 #                                                        dev_target_mask_paths,
