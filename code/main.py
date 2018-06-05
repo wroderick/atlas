@@ -383,7 +383,7 @@ def main(_):
       plt.subplot(1,3,3)
       plt.imshow(output_grads_wrt_input_image)
       plt.axis('off')
-      plt.savefig("../plots/SaliencyMap.pdf",transparent=True, bbox_inches='tight',dpi=3000)
+      #plt.savefig("../plots/SaliencyMap.pdf",transparent=True, bbox_inches='tight',dpi=3000)
       plt.show()
 
 
