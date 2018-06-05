@@ -366,6 +366,7 @@ def main(_):
       grads_wrt_input = atlas_model.get_grads_wrt_input(sess,curr_input,curr_target)
       grads_wrt_input = np.squeeze(grads_wrt_input)
       grads_wrt_input = np.absolute(grads_wrt_input)
+      grads_wrt_input = np.power(grads_wrt_input,1./3.)
       grads_wrt_input = grads_wrt_input/np.amax(grads_wrt_input)
       output_grads_wrt_input_image = np.dstack((grads_wrt_input,grads_wrt_input,grads_wrt_input))
       
