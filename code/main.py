@@ -226,7 +226,7 @@ def main(_):
       initialize_model(sess, atlas_model, FLAGS.train_dir, expect_exists=False)
       # Trains the model
       atlas_model.train(sess, *setup_train_dev_split(FLAGS))
-  elif FLAGS.mode == "eval": #to use different eval filepath, python main.py --experiment_name=0015 --eval_filepath="data_output_masks0015"
+  elif FLAGS.mode == "eval": #to use different eval filepath, python main.py --experiment_name=0015 --eval_filepath="data_output_masks0015" --mode=eval
     with tf.Session(config=config) as sess:
       # Sets logging configuration
       logging.basicConfig(level=logging.INFO)
@@ -239,7 +239,7 @@ def main(_):
         setup_train_dev_split(FLAGS)
        
       #will change dev input paths if you want to (otherwise default is data)
-      for i in xrange(len(dev_input_paths)):
+      for i in range(len(dev_input_paths)):
           filepath = dev_input_paths[i][0]
           dev_input_paths[i][0] = filepath.replace('data',FLAGS.eval_filepath)
 
