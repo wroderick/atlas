@@ -321,6 +321,7 @@ class ATLASModel(object):
     
     #grads_wrt_input_tensor = tf.gradients(self.predicted_masks_op, self.inputs_op)[0]
     grads_wrt_input_tensor = tf.gradients(self.predicted_mask_probs_op, self.inputs_op)[0]
+    #grads_wrt_input_tensor = tf.gradients(self.logits_op, self.inputs_op)[0]
     #grads_wrt_input_tensor = tf.gradients(self.loss, self.inputs_op)[0]
     grads_wrt_input = sess.run(grads_wrt_input_tensor,feed_dict=input_feed)
     return grads_wrt_input
