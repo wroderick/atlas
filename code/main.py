@@ -386,11 +386,21 @@ def main(_):
       plt.imshow(curr_input_img)
       #plt.axis('off')
       plt.subplot(1,3,2)
-      plt.imshow(curr_input_img)
-      curr_img_mask_overlay = np.zeros(curr_target_img.shape)
-      curr_img_mask_overlay[:,:,0] = curr_target_img[:,:,1]
-      curr_img_mask_overlay[:,:,1] = predicted_mask_img[:,:,1]
-      plt.imshow(curr_img_mask_overlay, alpha=0.2)
+      #plt.imshow(curr_input_img)
+      #curr_img_mask_overlay = np.zeros(curr_target_img.shape)
+      curr_img_mask_overlay = np.copy(curr_input_img)
+      curr_target_img_flags = curr_target_img[:,:,0] > 0.5
+      predicted_mask_img_flags = predicted_mask_img[:,:,0] > 0.5
+      curr_img_mask_overlay[curr_target_img_flags] = 0.
+      curr_img_mask_overlay[predicted_mask_img_flags] = 0.
+      curr_img_mask_overlay[curr_target_img_flags,1] = 155./255.
+      curr_img_mask_overlay[curr_target_img_flags,2] = 218./255.
+      #curr_img_mask_overlay[predicted_mask_img_flags,1] = 1.
+      curr_img_mask_overlay[predicted_mask_img_flags,0] = 1.
+      #curr_img_mask_overlay[:,:,0] = curr_target_img_array
+      #curr_img_mask_overlay[:,:,1] = predicted_mask_img_array
+      #plt.imshow(curr_img_mask_overlay, alpha=0.2)
+      plt.imshow(curr_img_mask_overlay)
       #plt.axis('off')
       plt.subplot(1,3,3)
       plt.imshow(output_grads_wrt_input_image)
@@ -402,16 +412,19 @@ def main(_):
       plt.imshow(curr_input_img)
       plt.axis('off')
       plt.subplot(1,3,2)
-      plt.imshow(curr_input_img)
-      curr_img_mask_overlay = np.zeros(curr_target_img.shape)
-      curr_img_mask_overlay[:,:,0] = curr_target_img[:,:,1]
-      curr_img_mask_overlay[:,:,1] = predicted_mask_img[:,:,1]
-      plt.imshow(curr_img_mask_overlay, alpha=0.2)
+      #plt.imshow(curr_input_img)
+      #curr_img_mask_overlay = np.zeros(curr_target_img.shape)
+      #curr_img_mask_overlay[:,:,0] = curr_target_img[:,:,1]
+      #curr_img_mask_overlay[:,:,1] = predicted_mask_img[:,:,1]
+      #plt.imshow(curr_img_mask_overlay, alpha=0.2)
+      plt.imshow(curr_img_mask_overlay)
       plt.axis('off')
       plt.subplot(1,3,3)
       plt.imshow(output_grads_wrt_input_image)
       plt.axis('off')
       #plt.savefig("../plots/SaliencyMap.pdf",transparent=True, bbox_inches='tight',dpi=3000)
+      plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95,
+                          wspace=0.01, hspace=0.01)
       plt.show()
 
 
